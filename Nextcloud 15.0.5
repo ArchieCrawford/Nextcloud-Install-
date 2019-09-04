@@ -1,0 +1,135 @@
+#Install NC
+#Update Centos 
+
+sudo yum -y update
+sudo yum clean all
+
+#Enable on firewall 
+sudo yum install firewalld
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+systemctl enable firewalld
+sudo reboot 
+
+#(restart Server)
+systemctl status firewalld
+
+#Install Apache 
+
+yum install httpd
+sudo systemctl start httpd
+sudo systemctl enable httpd
+sudo systemctl status httpd
+
+#Install Php7.2
+
+sudo yum install php
+sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+sudo yum install php72-php-fpm php72-php-gd php72-php-json php72-php-mbstring php72-php-mysqlnd php72-php-xml php72-php-xmlrpc php72-php-opcache
+sudo yum-config-manager --enable remi-php72
+sudo yum update
+
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+yum install -y php72w php72w-cli php72w-common php72w-curl php72w-gd \
+php72w-mbstring php72w-mysqlnd php72w-process php72w-xml php72w-zip \
+php72w-opcache php72w-pecl-apcu php72w-intl php72w-pecl-redis
+ 
+yum install php-pecl-zip
+
+
+yum install gcc php-devel php-pear
+yum install php-pecl-zip
+
+
+
+#Install MySql 
+
+sudo yum install mariadb-server
+sudo systemctl start mysql
+sudo systemctl status mysql
+sudo mysql_secure_installation
+(answer questions)
+
+mysql -uroot -p
+CREATE USER 'Username'@'localhost' IDENTIFIED BY 'Password';
+
+CREATE DATABASE IF NOT EXISTS nextcloud;
+
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON nextcloud.* TO 'Username'@'localhost' IDENTIFIED BY 'Password';
+
+FLUSH privileges;
+
+#Download Nextcloud 
+
+wget https://download.nextcloud.com/server/releases/nextcloud-15.0.5.zip -P /tmp
+
+wget https://download.nextcloud.com/server/releases/nextcloud-15.0.5.zip -P /tmp
+
+unzip /tmp/nextcloud-15.0.5.zip  -d /var/www
+
+mkdir /var/www/nextcloud/data
+
+chown -R apache:apache /var/www/nextcloud
+
+systemctl restart httpd.service
+
+
+#Change doc root and configure apache 
+
+  /etc/httpd/conf/httpd.conf
+	DocumentRoot "/var/www/nextcloud"
+
+
+mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.backup
+systemctl restart httpd
+
+systemctl restart network
+
+
+#Other Security installs 
+
+yum install gcc php-devel php-pear
+yum install ImageMagick ImageMagick-devel
+pecl install imagick
+echo "extension=imagick.so" > /etc/php.d/imagick.ini
+service httpd reload
+
+
+
+
+
+SSL Install 
+https://certbot.eff.org/lets-encrypt/centosrhel7-apache
+
+
+
+systemctl restart httpd
+
+systemctl restart network
+
+
+
+#Go to the web page 
+
+#When opening application select Storage and Database and enter in MYSQL information 
+ 
+
+
+#Go back to server
+
+sudo -u apache php occ db:convert-filecache-bigint (in nextcloud dir )
+Edit Opache File - 
+
+/etc/php.d]# 10-opcache.ini
+
+Enable PHP OPcache
+The OPcache improves the performance of PHP applications by caching precompiled bytecode. We recommend at least following settings:
+opcache.enable=1
+opcache.enable_cli=1
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=10000
+opcache.memory_consumption=128
+opcache.save_comments=1
+opcache.revalidate_freq=1
+
+
